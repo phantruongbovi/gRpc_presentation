@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+    id 'com.google.protobuf' version '0.8.16'
+    id 'idea'
+}
+
+group 'com.github.simple.grpc'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.12.0"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.38.0'
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java { option 'lite' }
+            }
+            task.plugins {
+                grpc { option 'lite' }
+            }
+        }
+    }
+}
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    // implement from grpc java Gradle with non-Android 'https://github.com/grpc/grpc-java'
+    implementation 'io.grpc:grpc-netty-shaded:1.38.0'
+    implementation 'io.grpc:grpc-protobuf:1.38.0'
+    implementation 'io.grpc:grpc-stub:1.38.0'
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
+    implementation 'io.grpc:grpc-netty-shaded:1.38.0'
+    implementation "io.grpc:grpc-services:1.38.0"   //reflection
+    //https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver/3.12.8
+    implementation group: 'org.mongodb', name: 'mongo-java-driver', version: '3.12.8'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets.main.java.srcDir new File(buildDir, 'generated/source')
+idea {
+    module {
+        // Marks the already(!) added srcDir as "generated"
+        generatedSourceDirs += file('build/generated/source')
+    }
+}
